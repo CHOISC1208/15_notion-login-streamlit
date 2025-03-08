@@ -131,7 +131,7 @@ else:
                     
                     # データフレームをセッションに保存
                     st.session_state["result_df"] = df
-                    st.session_state["cassette_info"] = cassette_module.cassette_info
+                    #st.session_state["cassette_info"] = cassette_module.cassette_info
                 else:
                     st.error("カセットからデータフレームを取得できませんでした")
             except Exception as e:
@@ -141,15 +141,15 @@ else:
     # 処理結果の表示
     if "result_df" in st.session_state:
         df = st.session_state["result_df"]
-        cassette_info = st.session_state["cassette_info"]
+        #cassette_info = st.session_state["cassette_info"]
         
         # カセット情報の表示
-        st.subheader(f"カセット: {cassette_info['name']}")
-        with st.expander("カセット詳細"):
-            st.write(f"kintoneドメイン: {cassette_info['domain']}")
-            st.write(f"アプリID: {cassette_info['app_id']}")
-            if cassette_info.get("query"):
-                st.write(f"クエリ: {cassette_info['query']}")
+        #st.subheader(f"カセット: {cassette_info['name']}")
+        #with st.expander("カセット詳細"):
+        #    st.write(f"kintoneドメイン: {cassette_info['domain']}")
+        #    st.write(f"アプリID: {cassette_info['app_id']}")
+        #    if cassette_info.get("query"):
+        #        st.write(f"クエリ: {cassette_info['query']}")
         
         # 設定モジュールからグリッドオプションを取得
         grid_options = configure_grid(df)

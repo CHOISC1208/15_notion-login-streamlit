@@ -28,22 +28,17 @@ df = fetch_kintone_data(
 # 型設定と順序を同時に指定
 column_config = {
     '$id': 'float',
+    '使用部署': 'str',
     '仕入れ先': 'str',
-    'レコード番号': 'float',
-    '納品書': 'str',
-    '更新者_code': 'str',
-    '更新者_name': 'str',
-    '作成者_code': 'str',
-    '作成者_name': 'str',
     '税込購入金額': 'float',
     '購入履歴': 'str',
-    '$revision': 'float',
-    '更新日時': 'str',
     '受入日': 'date',
     '合計購入金額': 'float',
     '消費税': 'float',
     '作成日時': 'str',
-    '使用部署': 'str'
+    '更新日時': 'str',
+    '更新者_name': 'str',
+    '作成者_name': 'str'
 }
 
 # データフレームのクレンジング
