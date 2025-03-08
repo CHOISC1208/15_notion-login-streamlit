@@ -6,7 +6,7 @@ def fetch_kintone_data(domain, api_token, app_id, query=""):
     # kintoneのURLを正しく構築
     base_url = f"https://{domain}.cybozu.com/k/v1/records.json"
     headers = {"X-Cybozu-API-Token": api_token}
-    
+        
     all_records = []
     offset = 0
     limit = 500
