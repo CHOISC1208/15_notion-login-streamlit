@@ -5,3 +5,4 @@ streamlit==1.37.1
 streamlit-aggrid==1.0.5
 notion-client==2.3.0
 streamlit-authenticator==0.4.1
+python-dotenv==1.0.0
