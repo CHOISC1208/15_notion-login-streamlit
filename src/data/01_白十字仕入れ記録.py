@@ -9,7 +9,7 @@ API_SETTINGS={
     'configs':{
       'config1':{
           'app_no':'14',
-          'apitoken':'CCte4r7VzGbpOqRPFSZzJBiEcj6yr4yphOiJVo4M',
+          'apitoken':os.getenv('14_query'),
           'query':''
       }
     }
