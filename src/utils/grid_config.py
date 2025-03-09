@@ -37,23 +37,6 @@ def configure_grid(df):
         columns_panel=True
     )
     
-    # 7. 条件付きフォーマット
-    # 例: 数値カラムに対して条件付きフォーマットを適用
-    #numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
-    #for col in numeric_cols:
-    #    cellStyle_jscode = JsCode("""
-    #    function(params) {
-    #        if (params.value > 30) {
-    #            return { 'color': 'white', 'backgroundColor': 'green' };
-    #        } else if (params.value < 10) {
-    #            return { 'color': 'white', 'backgroundColor': 'red' };
-    #        } else {
-    #            return { 'color': 'black', 'backgroundColor': 'lightblue' };
-    #        }
-    #    }
-    #    """)
-    #    gb.configure_column(col, cellStyle=cellStyle_jscode)
-    
     # その他の便利な設定
     gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=15)
     gb.configure_selection('multiple', use_checkbox=False)
