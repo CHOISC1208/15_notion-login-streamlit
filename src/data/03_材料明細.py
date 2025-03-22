@@ -9,7 +9,7 @@ API_SETTINGS={
     'configs':{
       'config1':{
           'app_no':'31',
-          'apitoken':os.getenv('33_query'),
+          'apitoken':os.getenv('31_query'),
           'query':''
       }
     }

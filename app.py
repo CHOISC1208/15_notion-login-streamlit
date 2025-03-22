@@ -11,7 +11,7 @@ from src.utils.auth_manager import AuthManager
 
 # ページ設定
 st.set_page_config(
-    page_title="kintoneデータ活用プラットフォーム",
+    page_title="白十字様Datastation",
     layout="wide"
 )
 
