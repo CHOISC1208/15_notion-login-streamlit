@@ -4,10 +4,11 @@ from src.utils.notion_fetch import fetch_notion_data
 import importlib.util
 from pathlib import Path
 from st_aggrid import AgGrid
+import pandas as pd
 
 from src.utils.grid_config import configure_grid
 from src.utils.auth_manager import AuthManager
-
+from src.utils.process_csv import  process_csv
 
 # ページ設定
 st.set_page_config(
@@ -85,83 +86,123 @@ else:
             auth_manager.logout()
             st.rerun() 
 
-    # タイトル
-    st.title("kintoneデータ活用プラットフォーム")
+    # タブを作成
+    tab_cassette, tab_transform = st.tabs(["Cassette", "Transform"])
 
-    # カセットファイルのパス
-    cassette_dir = Path("src/data")
-    cassette_files = list(cassette_dir.glob("*.py"))
-    cassette_names = [f.stem for f in cassette_files]
+    # Cassetteタブ
+    with tab_cassette:
+        # タイトル
+        st.title("kintoneデータ活用")
 
-    if not cassette_names:
-        st.error("カセットが見つかりません")
-        st.stop()
+        # カセットファイルのパス
+        cassette_dir = Path("src/data")
+        cassette_files = list(cassette_dir.glob("*.py"))
+        cassette_names = [f.stem for f in cassette_files]
 
-    # カセット選択と実行ボタンを横に並べる
-    st.markdown('<div class="cassette-selection-area">', unsafe_allow_html=True)
-    col1, col2 = st.columns([3, 1])
-    
-    with col1:
-        # カセット選択
-        selected_cassette = st.selectbox("カセットを選択", cassette_names)
-    
-    with col2:
-        # 実行ボタン（上部に余白を追加して垂直方向に揃える）
-        st.markdown("<div style='padding-top: 32px;'></div>", unsafe_allow_html=True)
-        execute_button = st.button("データ取得・処理実行", key="execute_button", help="選択したカセットを実行します")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+        if not cassette_names:
+            st.error("カセットが見つかりません")
+            st.stop()
 
-    # 実行ボタンが押された場合の処理
-    if execute_button:
-        with st.spinner("データを取得・処理中..."):
-            try:
-                # 選択されたカセットファイルのパス
-                cassette_path = cassette_dir / f"{selected_cassette}.py"
-                
-                # カセットファイルをモジュールとして動的にインポート
-                spec = importlib.util.spec_from_file_location(selected_cassette, cassette_path)
-                cassette_module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(cassette_module)
-                
-                # カセットモジュールからデータフレームを取得
-                if hasattr(cassette_module, 'result_df'):
-                    df = cassette_module.result_df
-                    st.success(f"{len(df)}件のデータを取得しました")
+        # カセット選択と実行ボタンを横に並べる
+        st.markdown('<div class="cassette-selection-area">', unsafe_allow_html=True)
+        col1, col2 = st.columns([3, 1])
+        
+        with col1:
+            # カセット選択
+            selected_cassette = st.selectbox("カセットを選択", cassette_names)
+        
+        with col2:
+            # 実行ボタン（上部に余白を追加して垂直方向に揃える）
+            st.markdown("<div style='padding-top: 32px;'></div>", unsafe_allow_html=True)
+            execute_button = st.button("データ取得・処理実行", key="execute_button", help="選択したカセットを実行します")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # 実行ボタンが押された場合の処理
+        if execute_button:
+            with st.spinner("データを取得・処理中..."):
+                try:
+                    # 選択されたカセットファイルのパス
+                    cassette_path = cassette_dir / f"{selected_cassette}.py"
                     
-                    # データフレームをセッションに保存
-                    st.session_state["result_df"] = df
-                    #st.session_state["cassette_info"] = cassette_module.cassette_info
-                else:
-                    st.error("カセットからデータフレームを取得できませんでした")
-            except Exception as e:
-                st.error(f"エラーが発生しました: {e}")
-                st.exception(e)
+                    # カセットファイルをモジュールとして動的にインポート
+                    spec = importlib.util.spec_from_file_location(selected_cassette, cassette_path)
+                    cassette_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(cassette_module)
+                    
+                    # カセットモジュールからデータフレームを取得
+                    if hasattr(cassette_module, 'result_df'):
+                        df = cassette_module.result_df
+                        st.success(f"{len(df)}件のデータを取得しました")
+                        
+                        # データフレームをセッションに保存
+                        st.session_state["result_df"] = df
+                        #st.session_state["cassette_info"] = cassette_module.cassette_info
+                    else:
+                        st.error("カセットからデータフレームを取得できませんでした")
+                except Exception as e:
+                    st.error(f"エラーが発生しました: {e}")
+                    st.exception(e)
 
-    # 処理結果の表示
-    if "result_df" in st.session_state:
-        df = st.session_state["result_df"]
-        #cassette_info = st.session_state["cassette_info"]
-        
-        # カセット情報の表示
-        #st.subheader(f"カセット: {cassette_info['name']}")
-        #with st.expander("カセット詳細"):
-        #    st.write(f"kintoneドメイン: {cassette_info['domain']}")
-        #    st.write(f"アプリID: {cassette_info['app_id']}")
-        #    if cassette_info.get("query"):
-        #        st.write(f"クエリ: {cassette_info['query']}")
-        
-        # 設定モジュールからグリッドオプションを取得
-        grid_options = configure_grid(df)
-        
-        # AgGridを使用してデータテーブル表示
-        AgGrid(
-            df,
-            gridOptions=grid_options,
-            theme='streamlit',
-            height=600, 
-            width='100%',
-            enable_enterprise_modules=True,
-            allow_unsafe_jscode=True
-        )
+        # 処理結果の表示
+        if "result_df" in st.session_state:
+            df = st.session_state["result_df"]
+            #cassette_info = st.session_state["cassette_info"]
+            
+            # カセット情報の表示
+            #st.subheader(f"カセット: {cassette_info['name']}")
+            #with st.expander("カセット詳細"):
+            #    st.write(f"kintoneドメイン: {cassette_info['domain']}")
+            #    st.write(f"アプリID: {cassette_info['app_id']}")
+            #    if cassette_info.get("query"):
+            #        st.write(f"クエリ: {cassette_info['query']}")
+            
+            # 設定モジュールからグリッドオプションを取得
+            grid_options = configure_grid(df)
+            
+            # AgGridを使用してデータテーブル表示
+            AgGrid(
+                df,
+                gridOptions=grid_options,
+                theme='streamlit',
+                height=600, 
+                width='100%',
+                enable_enterprise_modules=True,
+                allow_unsafe_jscode=True
+            )
+
+    # Transformタブ
+    with tab_transform:
+        st.title("ninapos_data_trans")
+
+        # CSVファイルアップロード
+        uploaded_file = st.file_uploader("CSVファイルを選択", type=["csv"])
+
+        if uploaded_file is not None:
+            # CSVファイルを読み込み
+            raw_df = pd.read_csv(uploaded_file, encoding='shift-jis', header=None)
+
+            # データ変換を実行
+            transformed_df = process_csv(raw_df, uploaded_file.name)
+
+            # 変換結果を表示
+            st.write(transformed_df)
+
+            # 行数と容量を表示
+            st.write(f"行数: {len(transformed_df)} 行")
+            st.write(f"容量: {uploaded_file.size / (1024 * 1024):.2f} MB")
+
+            # 変換結果をダウンロード可能にする
+            @st.cache_data
+            def convert_df(df):
+                return df.to_csv(index=False).encode('utf-8')
+
+            csv = convert_df(transformed_df)
+            # ダウンロードボタン
+            st.download_button(
+                label="ダウンロード",
+                data=csv,
+                file_name=f"{uploaded_file.name.split('.')[0]}_process.csv",
+                mime="text/csv",
+            )
 
