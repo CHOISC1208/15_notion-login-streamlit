@@ -61,10 +61,25 @@ def process_csv(raw_df, file_name):
     # 日付カラムを追加
     filtered_df['date'] = date_value
 
-    # カラムの順番を再度変更
-    filtered_df = filtered_df[['部門番号', '部門名', '商品番号', '商品名', '基本価格', '店舗', '区分', '値', 'date']]
+    # 店舗が「合計」以外の行をフィルタリング
+    filtered_df = filtered_df[filtered_df['店舗'] != '合計']
 
-    return filtered_df
+    # ピボット処理
+    pivoted_df = filtered_df.pivot_table(index=['date', '部門番号', '部門名', '商品番号', '商品名', '基本価格', '店舗'],
+                                        columns='区分',
+                                        values='値',
+                                        aggfunc='sum')
+
+    # カラムの順番を整理
+    pivoted_df = pivoted_df[['販売', '出荷', 'ロス', 'セ/崩/解', '在庫']]
+
+    # DataFrameをリセット
+    pivoted_df = pivoted_df.reset_index()
+
+    return pivoted_df
+
+
+
 
 # CSVファイルのパスを指定
 #file_path = r'/Users/choisc/Library/Mobile Documents/com~apple~CloudDocs/github/15_notion-login-streamlit/archive/全店舗確認_2025-03-28-2.csv'
